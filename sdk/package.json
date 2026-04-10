@@ -1,0 +1,33 @@
+{
+  "name": "@fraise/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for the Fraise Protocol on Optimism",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "peerDependencies": {
+    "viem": ">=2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "viem": "^2.17.0"
+  },
+  "keywords": ["fraise", "optimism", "web3", "nfc", "time-credits"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/q04-oss/fraise-protocol"
+  }
+}

@@ -1,22 +1,66 @@
-# fraise-protocol
+## Foundry
 
-The open infrastructure layer for the Fraise ecosystem.
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-## Architecture
+Foundry consists of:
 
-- **contracts/** — Solidity smart contracts on Optimism
-  - Identity (`fraise.box`)
-  - NFC verification events
-  - $FRAISE gold-backed token (USDC bridge at launch)
-  - Time credits
-- **hardware/** — Device firmware and NFC reader code
-- **identity/** — `fraise.box` identity resolution and wallet linking
-- **sdk/** — Client SDK for interacting with the protocol
+- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-## Network
+## Documentation
 
-Optimism (Mainnet + Sepolia testnet)
+https://book.getfoundry.sh/
 
-## Payment Currency
+## Usage
 
-USDC at launch → $FRAISE (gold-backed) on migration
+### Build
+
+```shell
+$ forge build
+```
+
+### Test
+
+```shell
+$ forge test
+```
+
+### Format
+
+```shell
+$ forge fmt
+```
+
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Deploy
+
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
+```
+
+### Help
+
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
+```
