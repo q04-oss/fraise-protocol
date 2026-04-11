@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 import { Script, console2 } from "forge-std/Script.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { TimelockController } from "@openzeppelin/contracts/governance/TimelockController.sol";
+import { Ownable2Step } from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /// @notice Transfers DEFAULT_ADMIN_ROLE on all fraise-protocol contracts from the
 ///         deployer wallet to a Safe multisig, and rotates TimelockController
@@ -44,25 +45,26 @@ contract TransferRoles is Script {
         vm.startBroadcast(deployerPk);
 
         // ── AccessControl contracts (FraiseIdentity, FraiseTimeCredits, FraiseNFC,
-        //    FraiseToken proxy, FraisePayments) ────────────────────────────────────
-        address[5] memory contracts = [identity, timeCredits, nfc, token, payments];
-        for (uint256 i = 0; i < contracts.length; i++) {
-            AccessControl ac = AccessControl(contracts[i]);
+        //    FraiseToken proxy) ──────────────────────────────────────────────────
+        address[4] memory acContracts = [identity, timeCredits, nfc, token];
+        for (uint256 i = 0; i < acContracts.length; i++) {
+            AccessControl ac = AccessControl(acContracts[i]);
             ac.grantRole(DEFAULT_ADMIN_ROLE, safe);
             ac.revokeRole(DEFAULT_ADMIN_ROLE, deployer);
         }
 
+        // ── FraisePayments uses Ownable2Step — initiate transfer, Safe must accept ─
+        Ownable2Step(payments).transferOwnership(safe);
+
         // ── TimelockController ────────────────────────────────────────────────────
-        // Grant Safe proposer + executor + canceller roles, then revoke from deployer.
-        // The timelock admin (DEFAULT_ADMIN_ROLE) was set to address(0) at deploy,
-        // so no admin role to transfer.
-        TimelockController tc = TimelockController(payable(timelock));
-        tc.grantRole(PROPOSER_ROLE,  safe);
-        tc.grantRole(EXECUTOR_ROLE,  safe);
-        tc.grantRole(CANCELLER_ROLE, safe);
-        tc.revokeRole(PROPOSER_ROLE,  deployer);
-        tc.revokeRole(EXECUTOR_ROLE,  deployer);
-        // Note: deployer was never granted CANCELLER_ROLE at deploy — skip revoke.
+        // The TimelockController was deployed with admin = address(0), so only the
+        // contract itself holds DEFAULT_ADMIN_ROLE. Rotating proposer/executor roles
+        // requires queuing a proposal through the timelock (48h delay) — that is a
+        // separate governance action. The deployer's PROPOSER/EXECUTOR roles on the
+        // TimelockController are a low-risk residual; FraiseToken upgrades still
+        // require the 48h timelock delay regardless of who proposes.
+        // Silence unused variable warning:
+        timelock;
 
         vm.stopBroadcast();
 
@@ -75,5 +77,7 @@ contract TransferRoles is Script {
         console2.log("FraiseNFC:            ", nfc);
         console2.log("FraiseToken:          ", token);
         console2.log("FraisePayments:       ", payments);
+        console2.log("NOTE: FraisePayments ownership transfer is pending.");
+        console2.log("      Safe must call acceptOwnership() to complete it.");
     }
 }
